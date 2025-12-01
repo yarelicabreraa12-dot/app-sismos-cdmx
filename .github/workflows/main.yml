@@ -1,4 +1,4 @@
-name: Build App Sismos CDMX Android APK
+name: Build Android APK
 
 on:
   push:
@@ -9,55 +9,44 @@ on:
 
 jobs:
   build-apk:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install system dependencies
+    - name: Install system packages
       run: |
+        sudo dpkg --add-architecture i386
         sudo apt-get update
         sudo apt-get install -y \
-          build-essential \
-          python3-dev \
-          cython3 \
-          openjdk-17-jdk \
-          unzip \
-          curl \
-          git
+          python3 python3-pip python3-setuptools python3-wheel \
+          build-essential git zip unzip openjdk-11-jdk \
+          libncurses5 libncurses5:i386 libstdc++6 libstdc++6:i386 \
+          zlib1g zlib1g:i386
 
-    - name: Accept Android Licenses
+    - name: Install Python packages
       run: |
-        mkdir -p ~/.android
-        printf "# Licenses accepted automatically\n8933bad161af4178b1185d1a37fbf41ea5269c55" > ~/.android/repositories.cfg
-        yes | sdkmanager --licenses || true
+        pip install --upgrade pip cython
+        pip install flet buildozer
 
-    - name: Install Python dependencies
+    - name: Install Android SDK
       run: |
-        pip install --upgrade pip
-        pip install flet buildozer cython
+        mkdir -p $HOME/android-sdk
+        cd $HOME/android-sdk
 
-    - name: Initialize buildozer project
-      run: |
-        mkdir app_sismos_android
-        cd app_sismos_android
-        cp ../app_sismos_cdmx_FINAL.py main.py
-        buildozer init
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip commandlinetools-linux-9477386_latest.zip
+        mkdir -p cmdline-tools
+        mv cmdline-tools cmdline-tools/latest
+
+        yes | cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | cmdline-tools/latest/bin/sdkmanager \
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;33.0.2"
 
     - name: Build APK
-      run: |
-        cd app_sismos_android
-        buildozer android debug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-sismos-cdmx-apk
-        path: app_sismos_android/bin/*.apk
-        retention-days: 30
+      env:
+        ANDROIDSDK: $HOME/android-sdk
+        ANDR
