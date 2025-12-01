@@ -34,36 +34,31 @@ jobs:
         cd app_sismos_android
         cp ../app_sismos_cdmx_FINAL.py main.py
         
-        # Create buildozer.spec with ultra-stable Android config
-        cat > buildozer.spec << 'EOF'
-[app]
-
-title = App Sismos CDMX
-package.name = appsismoscdmx
-package.domain = org.cdmx.sismos
-source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,json,ttf
-version = 1.0.0
-requirements = flet
-fullscreen = 1
-orientation = portrait
-
-android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CALL_PHONE,SEND_SMS,INTERNET,ACCESS_NETWORK_STATE,WRITE_EXTERNAL_STORAGE
-
-android.api = 30
-android.minapi = 21
-android.ndk = 21b
-
-android.enable_androidx = True
-android.compile_sdk_version = 30
-android.build_tools_version = 30.0.0
-
-[buildozer]
-
-log_level = 2
-build_dir = ./.buildozer
-bin_dir = ./bin
-EOF
+        # Create buildozer.spec using echo (no heredoc)
+        echo "[app]" > buildozer.spec
+        echo "title = App Sismos CDMX" >> buildozer.spec
+        echo "package.name = appsismoscdmx" >> buildozer.spec
+        echo "package.domain = org.cdmx.sismos" >> buildozer.spec
+        echo "source.dir = ." >> buildozer.spec
+        echo "source.include_exts = py,png,jpg,kv,atlas,json,ttf" >> buildozer.spec
+        echo "version = 1.0.0" >> buildozer.spec
+        echo "requirements = flet" >> buildozer.spec
+        echo "fullscreen = 1" >> buildozer.spec
+        echo "orientation = portrait" >> buildozer.spec
+        echo "" >> buildozer.spec
+        echo "android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CALL_PHONE,SEND_SMS,INTERNET,ACCESS_NETWORK_STATE,WRITE_EXTERNAL_STORAGE" >> buildozer.spec
+        echo "android.api = 30" >> buildozer.spec
+        echo "android.minapi = 21" >> buildozer.spec
+        echo "android.ndk = 21b" >> buildozer.spec
+        echo "" >> buildozer.spec
+        echo "android.enable_androidx = True" >> buildozer.spec
+        echo "android.compile_sdk_version = 30" >> buildozer.spec
+        echo "android.build_tools_version = 30.0.0" >> buildozer.spec
+        echo "" >> buildozer.spec
+        echo "[buildozer]" >> buildozer.spec
+        echo "log_level = 2" >> buildozer.spec
+        echo "build_dir = ./.buildozer" >> buildozer.spec
+        echo "bin_dir = ./bin" >> buildozer.spec
         
         echo "Ultra-stable buildozer.spec created"
         ls -la
@@ -82,7 +77,7 @@ EOF
         
         # Build with explicit version configuration
         python -m buildozer --version
-        python -m buildozer android debug --verbose
+        python -m buildozer android debug
     
     - name: Upload APK artifacts
       uses: actions/upload-artifact@v4
