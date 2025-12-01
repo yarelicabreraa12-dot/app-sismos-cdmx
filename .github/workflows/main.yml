@@ -16,24 +16,17 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: 3.11
     
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          python3-dev \
-          default-jdk \
-          git \
-          unzip \
-          curl \
-          wget
+        sudo apt-get install -y build-essential python3-dev default-jdk git unzip curl wget
     
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flet>=0.21.0 buildozer>=1.5.0
+        pip install flet buildozer
     
     - name: Initialize buildozer project
       run: |
@@ -41,31 +34,27 @@ jobs:
         cd app_sismos_android
         cp ../app_sismos_cdmx_FINAL.py main.py
         
-        # Create buildozer.spec file
-        cat > buildozer.spec << 'EOF'
-[app]
-
-title = App Sismos CDMX
-package.name = appsismoscdmx
-package.domain = org.cdmx.sismos
-source.dir = .
-source.include_exts = py,png,jpg,kv,atlas,json,ttf
-version = 1.0.0
-requirements = flet, plyer
-fullscreen = 1
-orientation = portrait
-
-android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CALL_PHONE,SEND_SMS,INTERNET,ACCESS_NETWORK_STATE,WRITE_EXTERNAL_STORAGE
-android.api = 34
-android.minapi = 21
-android.ndk = 25b
-android.enable_androidx = True
-
-[buildozer]
-log_level = 2
-build_dir = ./.buildozer
-bin_dir = ./bin
-EOF
+        echo "[app]" > buildozer.spec
+        echo "title = App Sismos CDMX" >> buildozer.spec
+        echo "package.name = appsismoscdmx" >> buildozer.spec
+        echo "package.domain = org.cdmx.sismos" >> buildozer.spec
+        echo "source.dir = ." >> buildozer.spec
+        echo "source.include_exts = py,png,jpg,kv,atlas,json,ttf" >> buildozer.spec
+        echo "version = 1.0.0" >> buildozer.spec
+        echo "requirements = flet" >> buildozer.spec
+        echo "fullscreen = 1" >> buildozer.spec
+        echo "orientation = portrait" >> buildozer.spec
+        echo "" >> buildozer.spec
+        echo "android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CALL_PHONE,SEND_SMS,INTERNET,ACCESS_NETWORK_STATE" >> buildozer.spec
+        echo "android.api = 34" >> buildozer.spec
+        echo "android.minapi = 21" >> buildozer.spec
+        echo "android.ndk = 25b" >> buildozer.spec
+        echo "android.enable_androidx = True" >> buildozer.spec
+        echo "" >> buildozer.spec
+        echo "[buildozer]" >> buildozer.spec
+        echo "log_level = 2" >> buildozer.spec
+        echo "build_dir = ./.buildozer" >> buildozer.spec
+        echo "bin_dir = ./bin" >> buildozer.spec
         
         echo "buildozer.spec created successfully"
         ls -la
@@ -73,19 +62,7 @@ EOF
     - name: Build APK
       run: |
         cd app_sismos_android
-        python -m buildozer android debug --verbose
-    
-    - name: List generated files
-      run: |
-        cd app_sismos_android
-        if [ -d "bin" ]; then
-          ls -la bin/
-          echo "APK files found:"
-          find bin/ -name "*.apk" -exec ls -lh {} \;
-        else
-          echo "No bin directory found"
-          ls -la
-        fi
+        python -m buildozer android debug
     
     - name: Upload APK artifacts
       uses: actions/upload-artifact@v4
