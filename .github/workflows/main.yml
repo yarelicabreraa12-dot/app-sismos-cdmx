@@ -23,14 +23,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          python3-pip \
-          python3-dev \
-          default-jdk \
-          git \
-          unzip \
-          curl
+        sudo apt-get install -y build-essential python3-dev default-jdk git unzip curl
     
     - name: Install Python dependencies
       run: |
@@ -49,41 +42,9 @@ jobs:
         cd app_sismos_android
         python -m buildozer android debug
     
-        - name: Upload APK
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-sismos-cdmx-apk
         path: app_sismos_android/bin/*.apk
         retention-days: 30
-    
-    - name: Create Release
-      if: github.ref == 'refs/heads/main'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: app_sismos_android/bin/*.apk
-        tag_name: v1.0.0
-        name: App Sismos CDMX v1.0.0
-        body: |
-          🚨 App Sismos CDMX - Sistema de Prevención Sísmica
-          
-          📱 APK construido automáticamente por GitHub Actions
-          
-          ✅ Características:
-          - 👩‍💻 Créditos de las 4 creadoras
-          - 📱 Envío automático por WhatsApp
-          - 📍 Geolocalización funcional
-          - 💾 Sistema de contactos
-          - 🧪 Simulador de emergencia
-          - 🔊 Sonido de alerta
-          - 🎒 Kit de emergencia
-          
-          📋 Instrucciones:
-          1. Descargar este APK
-          2. Transferir a dispositivo Android
-          3. Habilitar "Fuentes desconocidas"
-          4. Instalar APK
-          5. ¡Listo para usar!
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
