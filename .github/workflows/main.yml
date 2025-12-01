@@ -1,0 +1,89 @@
+name: Build App Sismos CDMX Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          python3-pip \
+          python3-dev \
+          default-jdk \
+          git \
+          unzip \
+          curl
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flet>=0.21.0 buildozer>=1.5.0
+    
+    - name: Initialize buildozer project
+      run: |
+        mkdir app_sismos_android
+        cd app_sismos_android
+        cp ../app_sismos_cdmx_FINAL.py main.py
+        python -m buildozer android debug clean || true
+    
+    - name: Build APK
+      run: |
+        cd app_sismos_android
+        python -m buildozer android debug
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-sismos-cdmx-apk
+        path: app_sismos_android/bin/*.apk
+        retention-days: 30
+    
+    - name: Create Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: app_sismos_android/bin/*.apk
+        tag_name: v1.0.0
+        name: App Sismos CDMX v1.0.0
+        body: |
+          🚨 App Sismos CDMX - Sistema de Prevención Sísmica
+          
+          📱 APK construido automáticamente por GitHub Actions
+          
+          ✅ Características:
+          - 👩‍💻 Créditos de las 4 creadoras
+          - 📱 Envío automático por WhatsApp
+          - 📍 Geolocalización funcional
+          - 💾 Sistema de contactos
+          - 🧪 Simulador de emergencia
+          - 🔊 Sonido de alerta
+          - 🎒 Kit de emergencia
+          
+          📋 Instrucciones:
+          1. Descargar este APK
+          2. Transferir a dispositivo Android
+          3. Habilitar "Fuentes desconocidas"
+          4. Instalar APK
+          5. ¡Listo para usar!
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
