@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
     - name: Install system packages
       run: |
@@ -30,44 +30,20 @@ jobs:
         pip install --upgrade pip cython
         pip install flet buildozer
 
-    - name: Prepare Buildozer project
+    - name: Prepare project
       run: |
         mkdir app_sismos_android
-        cp app_sismos_cdmx_FINAL.py app_sismos_android/main.py
         cd app_sismos_android
-        buildozer init
-
-        # Cambiar configuración del buildozer.spec
-        sed -i 's/title = My Application/title = Sismos CDMX/' buildozer.spec
-        sed -i 's/package.name = myapp/package.name = sismos_cdmx/' buildozer.spec
-        sed -i 's/package.domain = org.test/package.domain = org.sismoscdmx/' buildozer.spec
-        sed -i 's/source.include_exts = py,kv,atlas/source.include_exts = py/' buildozer.spec
-        sed -i 's/requirements = python3, kivy/requirements = python3, flet/' buildozer.spec
-
-    - name: Install Android SDK
-      run: |
-        mkdir -p $HOME/android-sdk
-        cd $HOME/android-sdk
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip commandlinetools-linux-9477386_latest.zip
-        mkdir -p cmdline-tools
-        mv cmdline-tools cmdline-tools/latest
-        yes | cmdline-tools/latest/bin/sdkmanager --licenses
-        yes | cmdline-tools/latest/bin/sdkmanager \
-          "platform-tools" \
-          "platforms;android-33" \
-          "build-tools;33.0.2"
+        cp ../main.py main.py
+        python -m buildozer init
 
     - name: Build APK
-      env:
-        ANDROIDSDK: $HOME/android-sdk
-        ANDROID_NDK_HOME: $HOME/android-sdk/ndk
       run: |
         cd app_sismos_android
-        buildozer android debug
+        python -m buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: sismos-cdmx-apk
+        name: app-sismos-cdmx-apk
         path: app_sismos_android/bin/*.apk
