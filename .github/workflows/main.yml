@@ -21,7 +21,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential python3-dev default-jdk git unzip curl wget
+        sudo apt-get install -y build-essential python3-dev default-jdk git unzip curl wget openjdk-8-jdk
     
     - name: Install Python dependencies
       run: |
@@ -46,7 +46,7 @@ jobs:
         echo "orientation = portrait" >> buildozer.spec
         echo "" >> buildozer.spec
         echo "android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CALL_PHONE,SEND_SMS,INTERNET,ACCESS_NETWORK_STATE" >> buildozer.spec
-        echo "android.api = 34" >> buildozer.spec
+        echo "android.api = 33" >> buildozer.spec
         echo "android.minapi = 21" >> buildozer.spec
         echo "android.ndk = 25b" >> buildozer.spec
         echo "android.enable_androidx = True" >> buildozer.spec
@@ -62,6 +62,10 @@ jobs:
     - name: Build APK
       run: |
         cd app_sismos_android
+        # Accept all Android licenses automatically
+        yes | sdkmanager --licenses || true
+        # Force Android API version to stable one
+        export ANDROID_API=33
         python -m buildozer android debug
     
     - name: Upload APK artifacts
