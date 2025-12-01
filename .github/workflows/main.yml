@@ -1,12 +1,8 @@
 name: Build App Sismos CDMX Android APK
-
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
-
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -23,7 +19,14 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential python3-dev default-jdk git unzip curl
+        sudo apt-get install -y \
+          build-essential \
+          python3-dev \
+          default-jdk \
+          git \
+          unzip \
+          curl \
+          wget
     
     - name: Install Python dependencies
       run: |
@@ -35,14 +38,51 @@ jobs:
         mkdir app_sismos_android
         cd app_sismos_android
         cp ../app_sismos_cdmx_FINAL.py main.py
-        python -m buildozer android debug clean || true
+        
+        # Create buildozer.spec file
+        cat > buildozer.spec << 'EOF'
+[app]
+title = App Sismos CDMX
+package.name = appsismoscdmx
+package.domain = org.cdmx.sismos
+source.dir = .
+source.include_exts = py,png,jpg,kv,atlas,json,ttf
+version = 1.0.0
+requirements = flet, plyer
+fullscreen = 1
+orientation = portrait
+android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CALL_PHONE,SEND_SMS,INTERNET,ACCESS_NETWORK_STATE,WRITE_EXTERNAL_STORAGE
+android.api = 34
+android.minapi = 21
+android.ndk = 25b
+android.enable_androidx = True
+[buildozer]
+log_level = 2
+build_dir = ./.buildozer
+bin_dir = ./bin
+EOF
+        
+        echo "buildozer.spec created successfully"
+        ls -la
     
     - name: Build APK
       run: |
         cd app_sismos_android
-        python -m buildozer android debug
+        python -m buildozer android debug --verbose
     
-    - name: Upload APK
+    - name: List generated files
+      run: |
+        cd app_sismos_android
+        if [ -d "bin" ]; then
+          ls -la bin/
+          echo "APK files found:"
+          find bin/ -name "*.apk" -exec ls -lh {} \;
+        else
+          echo "No bin directory found"
+          ls -la
+        fi
+    
+    - name: Upload APK artifacts
       uses: actions/upload-artifact@v4
       with:
         name: app-sismos-cdmx-apk
