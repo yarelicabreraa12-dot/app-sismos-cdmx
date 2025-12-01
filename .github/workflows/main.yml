@@ -1,8 +1,10 @@
 name: Build App Sismos CDMX Android APK
+
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
@@ -42,6 +44,7 @@ jobs:
         # Create buildozer.spec file
         cat > buildozer.spec << 'EOF'
 [app]
+
 title = App Sismos CDMX
 package.name = appsismoscdmx
 package.domain = org.cdmx.sismos
@@ -51,11 +54,13 @@ version = 1.0.0
 requirements = flet, plyer
 fullscreen = 1
 orientation = portrait
+
 android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,CALL_PHONE,SEND_SMS,INTERNET,ACCESS_NETWORK_STATE,WRITE_EXTERNAL_STORAGE
 android.api = 34
 android.minapi = 21
 android.ndk = 25b
 android.enable_androidx = True
+
 [buildozer]
 log_level = 2
 build_dir = ./.buildozer
